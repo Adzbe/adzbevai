@@ -59,3 +59,18 @@ platform.export_crm_xlsx(user.id, Path("exports/crm.xlsx"))
 ```bash
 pytest -q
 ```
+
+
+## Vercel deployment notes (`NOT_FOUND` fix)
+
+If Vercel returns `NOT_FOUND`, it usually means no deployable route matched the incoming path.
+
+This repo now includes:
+
+- `api/index.py` as a Vercel Python serverless entrypoint (FastAPI app),
+- `vercel.json` rewrites so both `/` and any other path route to `api/index.py`.
+
+After pushing, redeploy and verify:
+
+- `/` returns API status,
+- `/health` returns healthy response.
