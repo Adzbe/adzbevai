@@ -110,7 +110,10 @@ class VoiceAgentPlatform:
                 required_fields_missing TEXT,
                 created_at TEXT NOT NULL,
                 pushed_to_crm INTEGER NOT NULL DEFAULT 0,
-                crm_reference TEXT
+                crm_reference TEXT,
+                lead_status TEXT NOT NULL DEFAULT "new",
+                lead_notes TEXT NOT NULL DEFAULT "",
+                assigned_to TEXT NOT NULL DEFAULT ""
             )
             """
         )
@@ -125,6 +128,15 @@ class VoiceAgentPlatform:
             )
             """
         )
+
+        columns = {row[1] for row in cur.execute("PRAGMA table_info(conversations)").fetchall()}
+        if "lead_status" not in columns:
+            cur.execute('ALTER TABLE conversations ADD COLUMN lead_status TEXT NOT NULL DEFAULT "new"')
+        if "lead_notes" not in columns:
+            cur.execute('ALTER TABLE conversations ADD COLUMN lead_notes TEXT NOT NULL DEFAULT ""')
+        if "assigned_to" not in columns:
+            cur.execute('ALTER TABLE conversations ADD COLUMN assigned_to TEXT NOT NULL DEFAULT ""')
+
         conn.commit()
         conn.close()
 
@@ -347,13 +359,75 @@ class VoiceAgentPlatform:
         conn.close()
         return crm_ref
 
+    def list_internal_crm_leads(self, user_id: int, status: str | None = None) -> list[dict[str, Any]]:
+        conn = self._conn()
+        query = """
+            SELECT c.id, c.agent_id, a.name AS agent_name, c.customer_name, c.customer_phone,
+                   c.customer_email, c.language, c.intent, c.details, c.required_fields_missing,
+                   c.created_at, c.pushed_to_crm, c.crm_reference, c.lead_status, c.lead_notes, c.assigned_to
+            FROM conversations c
+            JOIN agents a ON a.id = c.agent_id
+            WHERE a.user_id = ?
+        """
+        params: list[Any] = [user_id]
+        if status:
+            query += " AND c.lead_status = ?"
+            params.append(status)
+        query += " ORDER BY c.id DESC"
+        rows = conn.execute(query, tuple(params)).fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+
+    def update_internal_crm_lead(
+        self,
+        conversation_id: int,
+        *,
+        lead_status: str | None = None,
+        lead_notes: str | None = None,
+        assigned_to: str | None = None,
+    ) -> dict[str, Any]:
+        allowed_status = {"new", "contacted", "qualified", "won", "lost"}
+        changes: list[str] = []
+        values: list[Any] = []
+
+        if lead_status is not None:
+            if lead_status not in allowed_status:
+                raise ValueError("invalid lead status")
+            changes.append("lead_status = ?")
+            values.append(lead_status)
+        if lead_notes is not None:
+            changes.append("lead_notes = ?")
+            values.append(lead_notes)
+        if assigned_to is not None:
+            changes.append("assigned_to = ?")
+            values.append(assigned_to)
+
+        if not changes:
+            raise ValueError("no lead fields provided")
+
+        conn = self._conn()
+        values.append(conversation_id)
+        updated = conn.execute(
+            f"UPDATE conversations SET {', '.join(changes)} WHERE id = ?",
+            tuple(values),
+        ).rowcount
+        if updated == 0:
+            conn.close()
+            raise ValueError("conversation not found")
+
+        row = conn.execute("SELECT * FROM conversations WHERE id = ?", (conversation_id,)).fetchone()
+        conn.commit()
+        conn.close()
+        return dict(row)
+
     def export_crm_xlsx(self, user_id: int, output_file: Path) -> Path:
         conn = self._conn()
         rows = conn.execute(
             """
             SELECT c.id, a.name AS agent_name, c.customer_name, c.customer_phone,
                    c.customer_email, c.language, c.intent, c.details,
-                   c.required_fields_missing, c.created_at, c.pushed_to_crm, c.crm_reference
+                   c.required_fields_missing, c.created_at, c.pushed_to_crm, c.crm_reference,
+                   c.lead_status, c.assigned_to, c.lead_notes
             FROM conversations c
             JOIN agents a ON a.id = c.agent_id
             WHERE a.user_id = ?
@@ -376,6 +450,9 @@ class VoiceAgentPlatform:
             "Created At",
             "Pushed To CRM",
             "CRM Reference",
+            "Lead Status",
+            "Assigned To",
+            "Lead Notes",
         ]
 
         table_rows = [headers]
@@ -394,6 +471,9 @@ class VoiceAgentPlatform:
                     row["created_at"],
                     "yes" if row["pushed_to_crm"] else "no",
                     row["crm_reference"] or "",
+                    row["lead_status"] or "new",
+                    row["assigned_to"] or "",
+                    row["lead_notes"] or "",
                 ]
             )
 

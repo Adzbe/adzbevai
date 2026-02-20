@@ -60,6 +60,12 @@ class PushCrmPayload(BaseModel):
     crm_name: str = "generic-crm"
 
 
+class UpdateLeadPayload(BaseModel):
+    lead_status: str | None = None
+    lead_notes: str | None = None
+    assigned_to: str | None = None
+
+
 def _resolve_db_path() -> Path:
     override = os.getenv("VOICE_AGENT_DB_PATH")
     if override:
@@ -255,6 +261,31 @@ def push_conversation_to_crm(conversation_id: int, payload: PushCrmPayload) -> d
         return {"crm_reference": crm_ref}
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Runtime failure: {exc}") from exc
+
+
+@app.get("/users/{user_id}/crm/leads")
+@app.get("/api/users/{user_id}/crm/leads")
+def list_internal_crm_leads(user_id: int, status: str | None = None) -> list[dict]:
+    try:
+        return _get_platform().list_internal_crm_leads(user_id=user_id, status=status)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Runtime failure: {exc}") from exc
+
+
+@app.patch("/crm/leads/{conversation_id}")
+@app.patch("/api/crm/leads/{conversation_id}")
+def update_internal_crm_lead(conversation_id: int, payload: UpdateLeadPayload) -> dict:
+    try:
+        return _get_platform().update_internal_crm_lead(
+            conversation_id,
+            lead_status=payload.lead_status,
+            lead_notes=payload.lead_notes,
+            assigned_to=payload.assigned_to,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Runtime failure: {exc}") from exc
 

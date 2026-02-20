@@ -29,6 +29,8 @@ def test_live_endpoints_are_exposed() -> None:
         '@app.get("/agents/public")',
         '@app.post("/agents/{agent_id}/conversations")',
         '@app.post("/conversations/{conversation_id}/push-crm")',
+        '@app.get("/users/{user_id}/crm/leads")',
+        '@app.patch("/crm/leads/{conversation_id}")',
         '@app.get("/users/{user_id}/crm/export")',
     ]:
         assert endpoint in content

@@ -46,6 +46,18 @@ def test_end_to_end_with_multilingual_crm_and_xlsx(tmp_path: Path) -> None:
     crm_ref = platform.push_conversation_to_crm(capture["conversation_id"], crm_name="hubspot")
     assert crm_ref.startswith("hubspot-")
 
+    leads = platform.list_internal_crm_leads(user.id)
+    assert len(leads) == 1
+    assert leads[0]["lead_status"] == "new"
+
+    updated = platform.update_internal_crm_lead(
+        capture["conversation_id"],
+        lead_status="qualified",
+        assigned_to="sales@acme.test",
+        lead_notes="Hot lead from Spanish campaign",
+    )
+    assert updated["lead_status"] == "qualified"
+
     xlsx_file = platform.export_crm_xlsx(user.id, tmp_path / "crm_export.xlsx")
     assert xlsx_file.exists()
     assert xlsx_file.suffix == ".xlsx"

@@ -8,6 +8,7 @@ This backend MVP now supports the requested business flow more completely:
 - training context per agent (products, services, prices, patterns),
 - multilingual question generation and goal-driven customer data capture,
 - conversation logging with required-field validation,
+- built-in internal CRM pipeline (lead status, assignee, notes),
 - CRM push tracking with CRM reference IDs,
 - true `.xlsx` export for CRM leads.
 
@@ -103,6 +104,8 @@ This prevents SQLite initialization crashes during function startup.
 - `GET /agents/public?link=<unique_link>&language=en|es` - get customer question flow
 - `POST /agents/{agent_id}/conversations` - capture customer conversation
 - `POST /conversations/{conversation_id}/push-crm` - mark/push to CRM
+- `GET /users/{user_id}/crm/leads` - list internal CRM leads
+- `PATCH /crm/leads/{conversation_id}` - update internal lead status/assignee/notes
 - `GET /users/{user_id}/crm/export` - download CRM `.xlsx`
 
 ## Go-live checklist
@@ -118,7 +121,7 @@ This prevents SQLite initialization crashes during function startup.
 ## Website
 
 - Open the root URL of your deployment to access the live dashboard UI (`index.html`).
-- The dashboard connects to backend endpoints under `/api/*` and lets you create users/agents and fetch agent scripts.
+- The dashboard connects to backend endpoints under `/api/*` and supports admin onboarding, internal CRM management, and a browser-based live voice demo flow.
 
 
 ## Important: what URL to open
@@ -136,3 +139,9 @@ For quick demo login in the website:
 - `ADMIN_PASSWORD=Admin@2026`
 
 Set these as environment variables in production and rotate `AUTH_SECRET`.
+
+
+## Where is the voice agent?
+
+- The web app includes a **Live Voice Agent** section that uses browser speech APIs (speech synthesis + speech recognition) to run spoken question flows from your trained agent script.
+- For production telephony voice bots (inbound/outbound calls), connect this backend to Twilio/Retell/Vapi or your SIP provider.
