@@ -3,140 +3,283 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voice Agent SaaS</title>
+  <title>Voice Agent SaaS Platform</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background:#f5f7fb; color:#111; }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
-    .card { background: #fff; border-radius: 12px; padding: 16px; margin: 14px 0; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
-    h1 { margin: 0 0 8px; }
-    h2 { margin: 0 0 12px; font-size: 18px; }
-    input, textarea, select, button { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: 1px solid #cfd6e4; }
-    button { background:#2563eb; color:#fff; border:0; cursor:pointer; font-weight: 600; }
-    button:hover { background:#1d4ed8; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    pre { white-space: pre-wrap; background:#0b1020; color:#d8e2ff; border-radius:10px; padding:12px; min-height: 80px; }
-    .muted { color:#555; font-size:14px; }
+    :root { --bg:#f4f6fb; --card:#fff; --text:#121826; --brand:#2563eb; --ok:#0f9d58; --err:#d93025; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, Arial, sans-serif; color: var(--text); background: var(--bg); }
+    header { background: #0b1224; color: #fff; padding: 18px 24px; }
+    header h1 { margin: 0; font-size: 24px; }
+    header p { margin: 6px 0 0; opacity: .86; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .full { grid-column: 1/-1; }
+    .card { background: var(--card); border-radius: 12px; box-shadow: 0 4px 16px rgba(9,30,66,.08); padding: 16px; }
+    .card h2 { margin: 0 0 10px; font-size: 18px; }
+    label { font-size: 12px; font-weight: 700; display: block; margin-top: 8px; }
+    input, textarea, select, button { width: 100%; border: 1px solid #d0d7e2; border-radius: 8px; padding: 10px; margin-top: 6px; }
+    textarea { min-height: 70px; }
+    button { background: var(--brand); border: 0; color: #fff; font-weight: 700; cursor: pointer; }
+    button.secondary { background: #334155; }
+    .row { display:grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+    pre { background:#0f172a; color:#dbeafe; padding: 10px; border-radius: 8px; min-height: 80px; white-space: pre-wrap; }
+    .status { margin-bottom: 10px; padding: 10px; border-radius: 8px; font-size: 14px; }
+    .ok { background: #ecfdf3; color: #065f46; border: 1px solid #a7f3d0; }
+    .error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .muted { color:#4b5563; font-size: 13px; }
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr;} .row{grid-template-columns:1fr;} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Voice Agent SaaS — Live Dashboard</h1>
-    <p class="muted">Now you can actually use the product from a website UI (not only code).</p>
+  <header>
+    <h1>Voice Agent SaaS — Complete Live Website</h1>
+    <p>Create tenants, train agents, capture leads, push CRM, export XLSX.</p>
+  </header>
 
-    <div class="card">
-      <h2>API Health</h2>
-      <button onclick="checkHealth()">Check Health</button>
-      <pre id="healthOut"></pre>
-    </div>
+  <main class="container">
+    <div id="banner" class="status ok">Website loaded. Click <b>Health Check</b> to verify backend.</div>
 
-    <div class="grid">
-      <div class="card">
-        <h2>Create User</h2>
-        <input id="companyName" placeholder="Company name" />
-        <input id="email" placeholder="Email" />
-        <select id="role"><option>client</option><option>admin</option></select>
-        <select id="plan"><option>starter</option><option>growth</option><option>enterprise</option></select>
+    <section class="grid">
+      <article class="card">
+        <h2>1) Platform Health & Users</h2>
+        <button onclick="healthCheck()">Health Check</button>
+        <div class="row">
+          <button class="secondary" onclick="listUsers()">List Users</button>
+          <button class="secondary" onclick="toggleUser()">Activate/Deactivate User</button>
+        </div>
+
+        <label>Company Name</label>
+        <input id="company_name" placeholder="Acme Dental" />
+        <label>Email</label>
+        <input id="email" placeholder="owner@acme.test" />
+        <div class="row">
+          <div>
+            <label>Role</label>
+            <select id="role"><option>client</option><option>admin</option></select>
+          </div>
+          <div>
+            <label>Subscription</label>
+            <select id="subscription_plan"><option>starter</option><option>growth</option><option>enterprise</option></select>
+          </div>
+        </div>
         <button onclick="createUser()">Create User</button>
-        <pre id="userOut"></pre>
-      </div>
 
-      <div class="card">
-        <h2>Create Agent</h2>
-        <input id="userId" placeholder="User ID" />
-        <input id="agentName" placeholder="Agent name" />
-        <input id="bizType" placeholder="Business type (e.g. salon, clinic)" />
-        <input id="goals" placeholder="Goals comma-separated (bookings,customer_service)" />
-        <input id="languages" placeholder="Languages comma-separated (en,es)" />
-        <textarea id="products" placeholder="Products (one per line)"></textarea>
-        <textarea id="services" placeholder="Services (one per line)"></textarea>
-        <textarea id="prices" placeholder="Prices (one per line)"></textarea>
-        <textarea id="patterns" placeholder="Conversation patterns (one per line)"></textarea>
-        <button onclick="createAgent()">Create Agent</button>
-        <pre id="agentOut"></pre>
-      </div>
-    </div>
+        <div class="row">
+          <div>
+            <label>User ID for toggle</label>
+            <input id="toggle_user_id" placeholder="1" />
+          </div>
+          <div>
+            <label>is_active</label>
+            <select id="toggle_active"><option value="true">true</option><option value="false">false</option></select>
+          </div>
+        </div>
+        <pre id="users_out"></pre>
+      </article>
 
-    <div class="card">
-      <h2>Public Agent Script</h2>
-      <input id="agentLink" placeholder="Paste full unique_link" />
-      <select id="scriptLang"><option>en</option><option>es</option></select>
-      <button onclick="fetchScript()">Get Script</button>
-      <pre id="scriptOut"></pre>
-    </div>
-  </div>
+      <article class="card">
+        <h2>2) Agent Training Builder</h2>
+        <label>User ID</label>
+        <input id="agent_user_id" placeholder="auto-filled from create user" />
+        <label>Agent Name</label>
+        <input id="agent_name" placeholder="Dental Assistant AI" />
+        <label>Business Type</label>
+        <input id="business_type" placeholder="dental clinic" />
+        <div class="row">
+          <div>
+            <label>Goals (comma-separated)</label>
+            <input id="goals" placeholder="bookings,customer_service" />
+          </div>
+          <div>
+            <label>Languages (comma-separated)</label>
+            <input id="languages" placeholder="en,es" />
+          </div>
+        </div>
+        <label>Products (1 per line)</label>
+        <textarea id="products"></textarea>
+        <label>Services (1 per line)</label>
+        <textarea id="services"></textarea>
+        <label>Prices (1 per line)</label>
+        <textarea id="prices"></textarea>
+        <label>Patterns (1 per line)</label>
+        <textarea id="patterns"></textarea>
+
+        <div class="row">
+          <button onclick="createAgent()">Create Agent</button>
+          <button class="secondary" onclick="listAgents()">List Agents</button>
+        </div>
+
+        <pre id="agents_out"></pre>
+      </article>
+
+      <article class="card full">
+        <h2>3) Lead Capture + CRM + Export</h2>
+        <p class="muted">Use returned <b>unique_link</b> from agent creation for ads/websites.</p>
+        <div class="row">
+          <div>
+            <label>Unique Link (full URL)</label>
+            <input id="unique_link" placeholder="https://voice.example.com/a/..." />
+          </div>
+          <div>
+            <label>Language</label>
+            <select id="script_language"><option>en</option><option>es</option></select>
+          </div>
+        </div>
+        <button onclick="publicScript()">Get Public Script</button>
+
+        <div class="row">
+          <div>
+            <label>Agent ID</label>
+            <input id="conv_agent_id" placeholder="1" />
+          </div>
+          <div>
+            <label>Intent</label>
+            <input id="conv_intent" placeholder="booking" />
+          </div>
+        </div>
+        <label>Conversation details</label>
+        <textarea id="conv_details" placeholder="Customer asked for next-week appointment"></textarea>
+        <label>Customer Payload JSON</label>
+        <textarea id="customer_payload">{"full_name":"John","phone":"+123","email":"john@test.com","preferred_date":"2026-03-05","service_interest":"Cleaning","issue_summary":"Need callback"}</textarea>
+        <button onclick="captureConversation()">Capture Conversation</button>
+
+        <div class="row">
+          <div>
+            <label>Conversation ID</label>
+            <input id="conversation_id" placeholder="auto-filled" />
+          </div>
+          <div>
+            <label>CRM Name</label>
+            <input id="crm_name" value="hubspot" />
+          </div>
+        </div>
+        <div class="row">
+          <button onclick="pushCRM()">Push to CRM</button>
+          <button class="secondary" onclick="downloadExport()">Download CRM XLSX</button>
+        </div>
+
+        <pre id="leads_out"></pre>
+      </article>
+    </section>
+  </main>
 
   <script>
-    const API_BASE = '/api';
+    const API = '/api';
+    const out = (id, v) => document.getElementById(id).textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+    const lines = (v) => v.split('\n').map(x => x.trim()).filter(Boolean);
 
-    async function api(path, options = {}) {
-      const res = await fetch(`${API_BASE}${path}`, {
+    function banner(msg, ok=true){
+      const b = document.getElementById('banner');
+      b.className = `status ${ok ? 'ok' : 'error'}`;
+      b.textContent = msg;
+    }
+
+    async function req(path, options={}) {
+      const res = await fetch(`${API}${path}`, {
         headers: { 'Content-Type': 'application/json' },
         ...options,
       });
-      const text = await res.text();
+      const txt = await res.text();
       let data;
-      try { data = JSON.parse(text); } catch { data = text; }
-      if (!res.ok) throw new Error(JSON.stringify(data));
+      try { data = JSON.parse(txt); } catch { data = txt; }
+      if (!res.ok) throw new Error(typeof data === 'string' ? data : JSON.stringify(data));
       return data;
     }
 
-    function lines(v) { return v.split('\n').map(s => s.trim()).filter(Boolean); }
-
-    async function checkHealth() {
-      try {
-        const data = await api('/health');
-        document.getElementById('healthOut').textContent = JSON.stringify(data, null, 2);
-      } catch (e) {
-        document.getElementById('healthOut').textContent = e.message;
-      }
+    async function healthCheck(){
+      try { const d = await req('/health'); banner('Backend connected and healthy ✅'); out('users_out', d); }
+      catch(e){ banner(`Backend error: ${e.message}`, false); out('users_out', e.message); }
     }
 
-    async function createUser() {
+    async function createUser(){
       try {
         const payload = {
-          company_name: document.getElementById('companyName').value,
+          company_name: document.getElementById('company_name').value,
           email: document.getElementById('email').value,
           role: document.getElementById('role').value,
-          subscription_plan: document.getElementById('plan').value,
+          subscription_plan: document.getElementById('subscription_plan').value,
         };
-        const data = await api('/users', { method: 'POST', body: JSON.stringify(payload) });
-        document.getElementById('userOut').textContent = JSON.stringify(data, null, 2);
-        document.getElementById('userId').value = data.id;
-      } catch (e) {
-        document.getElementById('userOut').textContent = e.message;
-      }
+        const d = await req('/users', { method: 'POST', body: JSON.stringify(payload) });
+        document.getElementById('agent_user_id').value = d.id;
+        document.getElementById('toggle_user_id').value = d.id;
+        out('users_out', d);
+      } catch(e){ out('users_out', e.message); }
     }
 
-    async function createAgent() {
+    async function listUsers(){
+      try { out('users_out', await req('/admin/users')); }
+      catch(e){ out('users_out', e.message); }
+    }
+
+    async function toggleUser(){
       try {
-        const uid = document.getElementById('userId').value;
+        const id = document.getElementById('toggle_user_id').value;
+        const active = document.getElementById('toggle_active').value;
+        out('users_out', await req(`/admin/users/${id}/active?is_active=${active}`, { method: 'PATCH' }));
+      } catch(e){ out('users_out', e.message); }
+    }
+
+    async function createAgent(){
+      try {
+        const uid = document.getElementById('agent_user_id').value;
         const payload = {
-          name: document.getElementById('agentName').value,
-          business_type: document.getElementById('bizType').value,
-          goals: document.getElementById('goals').value.split(',').map(s => s.trim()).filter(Boolean),
-          languages: document.getElementById('languages').value.split(',').map(s => s.trim()).filter(Boolean),
+          name: document.getElementById('agent_name').value,
+          business_type: document.getElementById('business_type').value,
+          goals: document.getElementById('goals').value.split(',').map(v=>v.trim()).filter(Boolean),
+          languages: document.getElementById('languages').value.split(',').map(v=>v.trim()).filter(Boolean),
           products: lines(document.getElementById('products').value),
           services: lines(document.getElementById('services').value),
           prices: lines(document.getElementById('prices').value),
           patterns: lines(document.getElementById('patterns').value),
         };
-        const data = await api(`/users/${uid}/agents`, { method: 'POST', body: JSON.stringify(payload) });
-        document.getElementById('agentOut').textContent = JSON.stringify(data, null, 2);
-        document.getElementById('agentLink').value = data.unique_link;
-      } catch (e) {
-        document.getElementById('agentOut').textContent = e.message;
-      }
+        const d = await req(`/users/${uid}/agents`, { method: 'POST', body: JSON.stringify(payload) });
+        document.getElementById('unique_link').value = d.unique_link || '';
+        document.getElementById('conv_agent_id').value = d.id || '';
+        out('agents_out', d);
+      } catch(e){ out('agents_out', e.message); }
     }
 
-    async function fetchScript() {
+    async function listAgents(){
       try {
-        const link = document.getElementById('agentLink').value;
-        const language = document.getElementById('scriptLang').value;
-        const data = await api(`/agents/public?link=${encodeURIComponent(link)}&language=${encodeURIComponent(language)}`);
-        document.getElementById('scriptOut').textContent = JSON.stringify(data, null, 2);
-      } catch (e) {
-        document.getElementById('scriptOut').textContent = e.message;
-      }
+        const uid = document.getElementById('agent_user_id').value;
+        out('agents_out', await req(`/users/${uid}/agents`));
+      } catch(e){ out('agents_out', e.message); }
+    }
+
+    async function publicScript(){
+      try {
+        const link = encodeURIComponent(document.getElementById('unique_link').value);
+        const language = encodeURIComponent(document.getElementById('script_language').value);
+        out('leads_out', await req(`/agents/public?link=${link}&language=${language}`));
+      } catch(e){ out('leads_out', e.message); }
+    }
+
+    async function captureConversation(){
+      try {
+        const agentId = document.getElementById('conv_agent_id').value;
+        const payload = {
+          language: document.getElementById('script_language').value,
+          intent: document.getElementById('conv_intent').value,
+          details: document.getElementById('conv_details').value,
+          customer_payload: JSON.parse(document.getElementById('customer_payload').value),
+        };
+        const d = await req(`/agents/${agentId}/conversations`, { method: 'POST', body: JSON.stringify(payload) });
+        document.getElementById('conversation_id').value = d.conversation_id || '';
+        out('leads_out', d);
+      } catch(e){ out('leads_out', e.message); }
+    }
+
+    async function pushCRM(){
+      try {
+        const id = document.getElementById('conversation_id').value;
+        const payload = { crm_name: document.getElementById('crm_name').value };
+        out('leads_out', await req(`/conversations/${id}/push-crm`, { method:'POST', body: JSON.stringify(payload) }));
+      } catch(e){ out('leads_out', e.message); }
+    }
+
+    function downloadExport(){
+      const uid = document.getElementById('agent_user_id').value;
+      window.open(`${API}/users/${uid}/crm/export`, '_blank');
     }
   </script>
 </body>

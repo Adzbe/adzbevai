@@ -3,7 +3,10 @@ from pathlib import Path
 
 def test_vercel_config_and_entrypoint_exist() -> None:
     assert Path("vercel.json").exists()
-    assert Path("index.html").exists()
+    website = Path("index.html")
+    assert website.exists()
+    assert "Complete Live Website" in website.read_text(encoding="utf-8")
+
     entrypoint = Path("api/index.py")
     assert entrypoint.exists()
 

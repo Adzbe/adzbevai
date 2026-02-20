@@ -118,3 +118,10 @@ This prevents SQLite initialization crashes during function startup.
 
 - Open the root URL of your deployment to access the live dashboard UI (`index.html`).
 - The dashboard connects to backend endpoints under `/api/*` and lets you create users/agents and fetch agent scripts.
+
+
+## Important: what URL to open
+
+- Open your deployment root URL: `https://<your-app>.vercel.app/` to see the website dashboard.
+- API endpoints are under `https://<your-app>.vercel.app/api/...` and return JSON.
+- If you open `/api` or API routes directly, you will see JSON by design (that is expected).
