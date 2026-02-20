@@ -88,3 +88,27 @@ This API now resolves DB path as:
 3. local default path in non-serverless runs.
 
 This prevents SQLite initialization crashes during function startup.
+
+
+## Live API endpoints
+
+- `GET /` - service status
+- `GET /health` - runtime readiness
+- `GET /admin/users` - list users
+- `PATCH /admin/users/{user_id}/active?is_active=true|false` - activate/deactivate user
+- `POST /users` - create user
+- `POST /users/{user_id}/agents` - create trained agent with unique link
+- `GET /users/{user_id}/agents` - list user agents
+- `GET /agents/public?link=<unique_link>&language=en|es` - get customer question flow
+- `POST /agents/{agent_id}/conversations` - capture customer conversation
+- `POST /conversations/{conversation_id}/push-crm` - mark/push to CRM
+- `GET /users/{user_id}/crm/export` - download CRM `.xlsx`
+
+## Go-live checklist
+
+1. Set Vercel env vars if needed: `VOICE_AGENT_DB_PATH` (optional override).
+2. Deploy and verify `GET /` and `GET /health`.
+3. Create a user via `POST /users`.
+4. Create an agent via `POST /users/{user_id}/agents` and place the returned `unique_link` in ads/websites.
+5. Capture leads via `/agents/{agent_id}/conversations` and push to CRM with `/conversations/{id}/push-crm`.
+6. Export records from `/users/{user_id}/crm/export`.
