@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Agent SaaS</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background:#f5f7fb; color:#111; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+    .card { background: #fff; border-radius: 12px; padding: 16px; margin: 14px 0; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    h1 { margin: 0 0 8px; }
+    h2 { margin: 0 0 12px; font-size: 18px; }
+    input, textarea, select, button { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: 1px solid #cfd6e4; }
+    button { background:#2563eb; color:#fff; border:0; cursor:pointer; font-weight: 600; }
+    button:hover { background:#1d4ed8; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    pre { white-space: pre-wrap; background:#0b1020; color:#d8e2ff; border-radius:10px; padding:12px; min-height: 80px; }
+    .muted { color:#555; font-size:14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Voice Agent SaaS — Live Dashboard</h1>
+    <p class="muted">Now you can actually use the product from a website UI (not only code).</p>
+
+    <div class="card">
+      <h2>API Health</h2>
+      <button onclick="checkHealth()">Check Health</button>
+      <pre id="healthOut"></pre>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Create User</h2>
+        <input id="companyName" placeholder="Company name" />
+        <input id="email" placeholder="Email" />
+        <select id="role"><option>client</option><option>admin</option></select>
+        <select id="plan"><option>starter</option><option>growth</option><option>enterprise</option></select>
+        <button onclick="createUser()">Create User</button>
+        <pre id="userOut"></pre>
+      </div>
+
+      <div class="card">
+        <h2>Create Agent</h2>
+        <input id="userId" placeholder="User ID" />
+        <input id="agentName" placeholder="Agent name" />
+        <input id="bizType" placeholder="Business type (e.g. salon, clinic)" />
+        <input id="goals" placeholder="Goals comma-separated (bookings,customer_service)" />
+        <input id="languages" placeholder="Languages comma-separated (en,es)" />
+        <textarea id="products" placeholder="Products (one per line)"></textarea>
+        <textarea id="services" placeholder="Services (one per line)"></textarea>
+        <textarea id="prices" placeholder="Prices (one per line)"></textarea>
+        <textarea id="patterns" placeholder="Conversation patterns (one per line)"></textarea>
+        <button onclick="createAgent()">Create Agent</button>
+        <pre id="agentOut"></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Public Agent Script</h2>
+      <input id="agentLink" placeholder="Paste full unique_link" />
+      <select id="scriptLang"><option>en</option><option>es</option></select>
+      <button onclick="fetchScript()">Get Script</button>
+      <pre id="scriptOut"></pre>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+
+    async function api(path, options = {}) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = text; }
+      if (!res.ok) throw new Error(JSON.stringify(data));
+      return data;
+    }
+
+    function lines(v) { return v.split('\n').map(s => s.trim()).filter(Boolean); }
+
+    async function checkHealth() {
+      try {
+        const data = await api('/health');
+        document.getElementById('healthOut').textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        document.getElementById('healthOut').textContent = e.message;
+      }
+    }
+
+    async function createUser() {
+      try {
+        const payload = {
+          company_name: document.getElementById('companyName').value,
+          email: document.getElementById('email').value,
+          role: document.getElementById('role').value,
+          subscription_plan: document.getElementById('plan').value,
+        };
+        const data = await api('/users', { method: 'POST', body: JSON.stringify(payload) });
+        document.getElementById('userOut').textContent = JSON.stringify(data, null, 2);
+        document.getElementById('userId').value = data.id;
+      } catch (e) {
+        document.getElementById('userOut').textContent = e.message;
+      }
+    }
+
+    async function createAgent() {
+      try {
+        const uid = document.getElementById('userId').value;
+        const payload = {
+          name: document.getElementById('agentName').value,
+          business_type: document.getElementById('bizType').value,
+          goals: document.getElementById('goals').value.split(',').map(s => s.trim()).filter(Boolean),
+          languages: document.getElementById('languages').value.split(',').map(s => s.trim()).filter(Boolean),
+          products: lines(document.getElementById('products').value),
+          services: lines(document.getElementById('services').value),
+          prices: lines(document.getElementById('prices').value),
+          patterns: lines(document.getElementById('patterns').value),
+        };
+        const data = await api(`/users/${uid}/agents`, { method: 'POST', body: JSON.stringify(payload) });
+        document.getElementById('agentOut').textContent = JSON.stringify(data, null, 2);
+        document.getElementById('agentLink').value = data.unique_link;
+      } catch (e) {
+        document.getElementById('agentOut').textContent = e.message;
+      }
+    }
+
+    async function fetchScript() {
+      try {
+        const link = document.getElementById('agentLink').value;
+        const language = document.getElementById('scriptLang').value;
+        const data = await api(`/agents/public?link=${encodeURIComponent(link)}&language=${encodeURIComponent(language)}`);
+        document.getElementById('scriptOut').textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        document.getElementById('scriptOut').textContent = e.message;
+      }
+    }
+  </script>
+</body>
+</html>

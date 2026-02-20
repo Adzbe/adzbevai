@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from app.main import DB_PATH, VoiceAgentPlatform
 
-app = FastAPI(title="Voice Agent SaaS API", version="1.0.0")
+app = FastAPI(title="Voice Agent SaaS API", version="1.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -70,11 +70,12 @@ def _get_platform() -> VoiceAgentPlatform:
 
 
 @app.get("/")
-def root() -> dict[str, str]:
+def website_root() -> dict[str, str]:
     return {"status": "ok", "message": "Voice Agent SaaS API is running"}
 
 
 @app.get("/health")
+@app.get("/api/health")
 def health() -> dict[str, str]:
     try:
         _get_platform()
@@ -84,6 +85,7 @@ def health() -> dict[str, str]:
 
 
 @app.get("/admin/users")
+@app.get("/api/admin/users")
 def list_users() -> list[dict]:
     try:
         return _get_platform().list_users()
@@ -92,6 +94,7 @@ def list_users() -> list[dict]:
 
 
 @app.patch("/admin/users/{user_id}/active")
+@app.patch("/api/admin/users/{user_id}/active")
 def set_user_active(user_id: int, is_active: bool) -> dict[str, str]:
     try:
         _get_platform().set_user_active(user_id, is_active)
@@ -103,6 +106,7 @@ def set_user_active(user_id: int, is_active: bool) -> dict[str, str]:
 
 
 @app.post("/users")
+@app.post("/api/users")
 def create_user(payload: CreateUserPayload) -> dict:
     try:
         user = _get_platform().create_user(
@@ -127,6 +131,7 @@ def create_user(payload: CreateUserPayload) -> dict:
 
 
 @app.post("/users/{user_id}/agents")
+@app.post("/api/users/{user_id}/agents")
 def create_agent(user_id: int, payload: CreateAgentPayload) -> dict:
     try:
         return _get_platform().create_agent(
@@ -147,6 +152,7 @@ def create_agent(user_id: int, payload: CreateAgentPayload) -> dict:
 
 
 @app.get("/users/{user_id}/agents")
+@app.get("/api/users/{user_id}/agents")
 def list_agents(user_id: int) -> list[dict]:
     try:
         return _get_platform().list_agents(user_id)
@@ -155,6 +161,7 @@ def list_agents(user_id: int) -> list[dict]:
 
 
 @app.get("/agents/public")
+@app.get("/api/agents/public")
 def public_agent_script(link: str, language: str = "en") -> dict:
     try:
         return _get_platform().public_agent_script(unique_link=link, language=language)
@@ -165,6 +172,7 @@ def public_agent_script(link: str, language: str = "en") -> dict:
 
 
 @app.post("/agents/{agent_id}/conversations")
+@app.post("/api/agents/{agent_id}/conversations")
 def capture_conversation(agent_id: int, payload: CaptureConversationPayload) -> dict:
     try:
         return _get_platform().capture_conversation(
@@ -181,6 +189,7 @@ def capture_conversation(agent_id: int, payload: CaptureConversationPayload) -> 
 
 
 @app.post("/conversations/{conversation_id}/push-crm")
+@app.post("/api/conversations/{conversation_id}/push-crm")
 def push_conversation_to_crm(conversation_id: int, payload: PushCrmPayload) -> dict[str, str]:
     try:
         crm_ref = _get_platform().push_conversation_to_crm(conversation_id, crm_name=payload.crm_name)
@@ -192,6 +201,7 @@ def push_conversation_to_crm(conversation_id: int, payload: PushCrmPayload) -> d
 
 
 @app.get("/users/{user_id}/crm/export")
+@app.get("/api/users/{user_id}/crm/export")
 def export_crm(user_id: int) -> FileResponse:
     try:
         export_path = Path("/tmp") / f"crm-user-{user_id}.xlsx"

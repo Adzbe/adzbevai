@@ -112,3 +112,9 @@ This prevents SQLite initialization crashes during function startup.
 4. Create an agent via `POST /users/{user_id}/agents` and place the returned `unique_link` in ads/websites.
 5. Capture leads via `/agents/{agent_id}/conversations` and push to CRM with `/conversations/{id}/push-crm`.
 6. Export records from `/users/{user_id}/crm/export`.
+
+
+## Website
+
+- Open the root URL of your deployment to access the live dashboard UI (`index.html`).
+- The dashboard connects to backend endpoints under `/api/*` and lets you create users/agents and fetch agent scripts.
