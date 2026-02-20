@@ -74,3 +74,17 @@ After pushing, redeploy and verify:
 
 - `/` returns API status,
 - `/health` returns healthy response.
+
+
+### `FUNCTION_INVOCATION_FAILED` note
+
+If Vercel shows `FUNCTION_INVOCATION_FAILED`, your function matched a route but crashed while running.
+
+In serverless environments, writing to the project directory can fail because it is read-only.
+This API now resolves DB path as:
+
+1. `VOICE_AGENT_DB_PATH` (if provided),
+2. `/tmp/voice_agents.db` on Vercel,
+3. local default path in non-serverless runs.
+
+This prevents SQLite initialization crashes during function startup.
