@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoiceAgent SaaS OS</title>
+  <style>
+    :root{--bg:#070c1b;--panel:#101936;--panel2:#0d1430;--line:#2d3d78;--text:#f6f8ff;--muted:#a5b2df;--brand:#5e7bff;--brand2:#20d9ff;}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,#1b2d70 0,#070c1b 45%);color:var(--text)}
+    .wrap{max-width:1380px;margin:auto;padding:18px;display:grid;gap:14px;grid-template-columns:290px 1fr}
+    .panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:16px}
+    .side{padding:14px;position:sticky;top:14px;height:fit-content}.brand{font-weight:800;font-size:22px}.muted{color:var(--muted);font-size:12px}
+    .status{padding:10px;border-radius:10px;background:#163061;border:1px solid #3558b1;margin:10px 0;font-size:13px}
+    .main{display:grid;gap:14px}.hero{padding:16px}.hero h1{margin:0;font-size:32px}.hero p{color:var(--muted)}
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.kpi{padding:14px}.kpi strong{display:block;font-size:24px;margin-top:6px}
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:15px}.card h2{margin:0 0 10px}
+    label{font-size:12px;color:var(--muted);display:block;margin-top:8px} input,select,textarea,button{width:100%;margin-top:5px;border-radius:10px;padding:10px;color:var(--text);background:#0a1230;border:1px solid #30438a}
+    button{background:linear-gradient(90deg,var(--brand),var(--brand2));border:none;font-weight:700;cursor:pointer}.secondary{background:#223874;border:1px solid #3f57aa}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
+    pre{background:#070f28;border:1px solid #2e4289;border-radius:10px;padding:10px;min-height:80px;white-space:pre-wrap}
+    .kanban{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.column{background:#0a1230;border:1px solid #2c4086;border-radius:10px;padding:8px;min-height:180px}
+    .lead{padding:8px;background:#111d46;border:1px solid #3952aa;border-radius:8px;margin-bottom:7px;font-size:12px}
+    @media(max-width:1080px){.wrap{grid-template-columns:1fr}.side{position:static}.kpis,.grid,.row,.kanban{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="panel side">
+    <div class="brand">VoiceAgent SaaS OS</div>
+    <div class="muted">Complete Live Website · Internal CRM + Live Voice Agent</div>
+    <div id="banner" class="status">Login as admin, then onboard clients and run live voice demos.</div>
+    <label>Admin Email</label><input id="admin_email" value="admin@voiceagent.ai" />
+    <label>Admin Password</label><input id="admin_password" type="password" value="Admin@2026" />
+    <button onclick="adminLogin()">Admin Login</button>
+    <button class="secondary" onclick="logout()">Logout</button>
+    <button class="secondary" onclick="healthCheck()">Health Check</button>
+  </aside>
+
+  <main class="main">
+    <section class="panel hero"><h1>Real SaaS Platform (Not Just Board Demo)</h1><p>Includes admin auth, user onboarding, AI agent training, internal CRM pipeline, and browser voice interaction flow.</p></section>
+    <section class="kpis">
+      <article class="panel kpi"><span>Users</span><strong id="kpi_users">0</strong></article>
+      <article class="panel kpi"><span>Agents</span><strong id="kpi_agents">0</strong></article>
+      <article class="panel kpi"><span>Leads</span><strong id="kpi_leads">0</strong></article>
+      <article class="panel kpi"><span>CRM Pushed</span><strong id="kpi_crm">0</strong></article>
+    </section>
+
+    <section class="grid">
+      <article class="panel card">
+        <h2>Admin · User Creation</h2>
+        <label>Company Name</label><input id="company_name" placeholder="Acme Dental"/>
+        <label>Email</label><input id="email" placeholder="owner@acme.test"/>
+        <div class="row"><div><label>Role</label><select id="role"><option>client</option><option>admin</option></select></div><div><label>Plan</label><select id="subscription_plan"><option>starter</option><option>growth</option><option>enterprise</option></select></div></div>
+        <button onclick="createUser()">Create User</button>
+        <div class="row"><div><label>User ID</label><input id="toggle_user_id"/></div><div><label>is_active</label><select id="toggle_active"><option value="true">true</option><option value="false">false</option></select></div></div>
+        <button class="secondary" onclick="toggleUser()">Update User Status</button>
+        <pre id="users_out"></pre>
+      </article>
+
+      <article class="panel card">
+        <h2>Client · Train Voice Agent</h2>
+        <label>User ID</label><input id="agent_user_id"/>
+        <label>Agent Name</label><input id="agent_name" placeholder="Dental Assistant AI"/>
+        <label>Business Type</label><input id="business_type" placeholder="clinic"/>
+        <div class="row"><div><label>Goals</label><input id="goals" placeholder="bookings,customer_service"/></div><div><label>Languages</label><input id="languages" placeholder="en,es"/></div></div>
+        <label>Products</label><textarea id="products"></textarea>
+        <label>Services</label><textarea id="services"></textarea>
+        <label>Prices</label><textarea id="prices"></textarea>
+        <label>Patterns</label><textarea id="patterns"></textarea>
+        <div class="row"><button onclick="createAgent()">Create Agent</button><button class="secondary" onclick="listAgents()">List Agents</button></div>
+        <pre id="agents_out"></pre>
+      </article>
+
+      <article class="panel card full">
+        <h2>Live Voice Agent + Conversation Capture</h2>
+        <div class="row"><div><label>Unique Link</label><input id="unique_link"/></div><div><label>Language</label><select id="script_language"><option>en</option><option>es</option></select></div></div>
+        <button onclick="publicScript()">Load Agent Script</button>
+        <div class="row"><button onclick="startVoiceDemo()">Start Voice Demo</button><button class="secondary" onclick="stopVoiceDemo()">Stop Voice Demo</button></div>
+        <label>Live Transcript</label><textarea id="live_transcript" placeholder="Voice transcript will appear here..."></textarea>
+        <div class="row"><div><label>Agent ID</label><input id="conv_agent_id"/></div><div><label>Intent</label><input id="conv_intent" value="booking"/></div></div>
+        <label>Customer JSON</label><textarea id="customer_payload">{"full_name":"John Doe","phone":"+123","email":"john@test.com","preferred_date":"2026-03-05","service_interest":"Cleaning","issue_summary":"Need callback"}</textarea>
+        <button onclick="captureConversation()">Save Conversation as Lead</button>
+        <pre id="leads_out"></pre>
+      </article>
+
+      <article class="panel card full">
+        <h2>Internal CRM Pipeline (Built-in)</h2>
+        <div class="row"><div><label>User ID for CRM</label><input id="crm_user_id"/></div><div><label>Filter Status</label><select id="crm_filter"><option value="">all</option><option>new</option><option>contacted</option><option>qualified</option><option>won</option><option>lost</option></select></div></div>
+        <div class="row"><button onclick="loadCrmLeads()">Load Internal CRM</button><button class="secondary" onclick="downloadExport()">Export XLSX</button></div>
+        <div class="row"><div><label>Conversation ID</label><input id="crm_conversation_id"/></div><div><label>Assign To</label><input id="crm_assigned_to" placeholder="sales@company.com"/></div></div>
+        <div class="row"><div><label>Status</label><select id="crm_status"><option>new</option><option>contacted</option><option>qualified</option><option>won</option><option>lost</option></select></div><div><label>External Push CRM</label><input id="crm_name" value="internal-crm"/></div></div>
+        <label>Lead Notes</label><textarea id="crm_notes"></textarea>
+        <div class="row"><button onclick="updateLead()">Update Internal Lead</button><button class="secondary" onclick="pushCRM()">Push CRM Event</button></div>
+        <div id="kanban" class="kanban"></div>
+      </article>
+    </section>
+  </main>
+</div>
+<script>
+const API='/api';
+let adminToken=localStorage.getItem('voice_admin_token')||'';
+let recognition=null; let loadedQuestions=[];
+const out=(id,v)=>document.getElementById(id).textContent=typeof v==='string'?v:JSON.stringify(v,null,2);
+const lines=v=>v.split('\n').map(x=>x.trim()).filter(Boolean);
+function banner(msg){document.getElementById('banner').textContent=msg;}
+async function req(path,opt={}){const headers={'Content-Type':'application/json',...(opt.headers||{})};if(adminToken)headers.Authorization=`Bearer ${adminToken}`;const r=await fetch(`${API}${path}`,{...opt,headers});const t=await r.text();let d;try{d=JSON.parse(t);}catch{d=t;}if(!r.ok)throw new Error(typeof d==='string'?d:JSON.stringify(d));return d;}
+function updateKpis(users=null,agents=null,leads=null,crm=null){if(users!==null)kpi_users.textContent=users;if(agents!==null)kpi_agents.textContent=agents;if(leads!==null)kpi_leads.textContent=leads;if(crm!==null)kpi_crm.textContent=crm;}
+async function adminLogin(){try{const d=await req('/admin/login',{method:'POST',body:JSON.stringify({email:admin_email.value,password:admin_password.value})});adminToken=d.access_token;localStorage.setItem('voice_admin_token',adminToken);banner('Admin login success.');await listUsers();}catch(e){banner('Login failed: '+e.message);}}
+function logout(){adminToken='';localStorage.removeItem('voice_admin_token');banner('Logged out.');}
+async function healthCheck(){try{await req('/health');banner('Backend healthy and online.');}catch(e){banner('Health failed: '+e.message);}}
+async function createUser(){try{const d=await req('/users',{method:'POST',body:JSON.stringify({company_name:company_name.value,email:email.value,role:role.value,subscription_plan:subscription_plan.value})});agent_user_id.value=d.id;crm_user_id.value=d.id;toggle_user_id.value=d.id;out('users_out',d);await listUsers();}catch(e){out('users_out',e.message);}}
+async function listUsers(){try{const users=await req('/admin/users');out('users_out',users);updateKpis(users.length,null,null,null);}catch(e){out('users_out',e.message);}}
+async function toggleUser(){try{out('users_out',await req(`/admin/users/${toggle_user_id.value}/active?is_active=${toggle_active.value}`,{method:'PATCH'}));await listUsers();}catch(e){out('users_out',e.message);}}
+async function createAgent(){try{const d=await req(`/users/${agent_user_id.value}/agents`,{method:'POST',body:JSON.stringify({name:agent_name.value,business_type:business_type.value,goals:goals.value.split(',').map(v=>v.trim()).filter(Boolean),languages:languages.value.split(',').map(v=>v.trim()).filter(Boolean),products:lines(products.value),services:lines(services.value),prices:lines(prices.value),patterns:lines(patterns.value)})});unique_link.value=d.unique_link||'';conv_agent_id.value=d.id||'';out('agents_out',d);await listAgents();}catch(e){out('agents_out',e.message);}}
+async function listAgents(){try{if(!agent_user_id.value)return;const agents=await req(`/users/${agent_user_id.value}/agents`);out('agents_out',agents);updateKpis(null,agents.length,null,null);}catch(e){out('agents_out',e.message);}}
+async function publicScript(){try{const d=await req(`/agents/public?link=${encodeURIComponent(unique_link.value)}&language=${encodeURIComponent(script_language.value)}`);loadedQuestions=d.questions||[];out('leads_out',d);}catch(e){out('leads_out',e.message);}}
+function startVoiceDemo(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!('speechSynthesis' in window)||!SR){banner('Voice API not supported in this browser. Use Chrome desktop.');return;}if(!loadedQuestions.length){banner('Load agent script first.');return;}let i=0;const speakQ=()=>{if(i>=loadedQuestions.length){banner('Voice question flow completed.');return;}const u=new SpeechSynthesisUtterance(loadedQuestions[i]);speechSynthesis.speak(u);i+=1;};recognition=new SR();recognition.lang=script_language.value==='es'?'es-ES':'en-US';recognition.interimResults=true;recognition.onresult=e=>{let txt='';for(let j=e.resultIndex;j<e.results.length;j++){txt+=e.results[j][0].transcript+' ';}live_transcript.value=txt.trim();};recognition.onend=()=>{speakQ(); if(i<loadedQuestions.length) recognition.start();};banner('Live voice demo started.');speakQ(); recognition.start();}
+function stopVoiceDemo(){if(recognition){recognition.stop();recognition=null;}speechSynthesis.cancel();banner('Voice demo stopped.');}
+async function captureConversation(){try{const payload={language:script_language.value,intent:conv_intent.value,details:live_transcript.value||'captured from voice demo',customer_payload:JSON.parse(customer_payload.value)};const d=await req(`/agents/${conv_agent_id.value}/conversations`,{method:'POST',body:JSON.stringify(payload)});crm_conversation_id.value=d.conversation_id||'';out('leads_out',d);await loadCrmLeads();}catch(e){out('leads_out',e.message);}}
+async function loadCrmLeads(){try{const q=crm_filter.value?`?status=${encodeURIComponent(crm_filter.value)}`:'';const leads=await req(`/users/${crm_user_id.value}/crm/leads${q}`);const buckets={new:[],contacted:[],qualified:[],won:[],lost:[]};let pushed=0;for(const l of leads){buckets[l.lead_status||'new']?.push(l);if(l.pushed_to_crm)pushed+=1;}kanban.innerHTML=['new','contacted','qualified','won','lost'].map(k=>`<div class="column"><b>${k.toUpperCase()}</b>${(buckets[k]||[]).map(l=>`<div class="lead">#${l.id} · ${l.customer_name||'No Name'}<br>${l.intent||''}<br>${l.assigned_to||'unassigned'}</div>`).join('')}</div>`).join('');updateKpis(null,null,leads.length,pushed);}catch(e){kanban.innerHTML=`<div class="lead">${e.message}</div>`;}}
+async function updateLead(){try{const d=await req(`/crm/leads/${crm_conversation_id.value}`,{method:'PATCH',body:JSON.stringify({lead_status:crm_status.value,lead_notes:crm_notes.value,assigned_to:crm_assigned_to.value})});out('leads_out',d);await loadCrmLeads();}catch(e){out('leads_out',e.message);}}
+async function pushCRM(){try{const d=await req(`/conversations/${crm_conversation_id.value}/push-crm`,{method:'POST',body:JSON.stringify({crm_name:crm_name.value})});out('leads_out',d);await loadCrmLeads();}catch(e){out('leads_out',e.message);}}
+function downloadExport(){window.open(`${API}/users/${crm_user_id.value}/crm/export`,'_blank');}
+healthCheck();
+</script>
+</body></html>
