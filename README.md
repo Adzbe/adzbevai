@@ -94,9 +94,10 @@ This prevents SQLite initialization crashes during function startup.
 
 - `GET /` - service status
 - `GET /health` - runtime readiness
-- `GET /admin/users` - list users
-- `PATCH /admin/users/{user_id}/active?is_active=true|false` - activate/deactivate user
-- `POST /users` - create user
+- `POST /admin/login` - admin authentication (returns bearer token)
+- `GET /admin/users` - list users (admin token required)
+- `PATCH /admin/users/{user_id}/active?is_active=true|false` - activate/deactivate user (admin token required)
+- `POST /users` - create user (admin token required)
 - `POST /users/{user_id}/agents` - create trained agent with unique link
 - `GET /users/{user_id}/agents` - list user agents
 - `GET /agents/public?link=<unique_link>&language=en|es` - get customer question flow
@@ -125,3 +126,13 @@ This prevents SQLite initialization crashes during function startup.
 - Open your deployment root URL: `https://<your-app>.vercel.app/` to see the website dashboard.
 - API endpoints are under `https://<your-app>.vercel.app/api/...` and return JSON.
 - If you open `/api` or API routes directly, you will see JSON by design (that is expected).
+
+
+## Admin auth defaults
+
+For quick demo login in the website:
+
+- `ADMIN_EMAIL=admin@voiceagent.ai`
+- `ADMIN_PASSWORD=Admin@2026`
+
+Set these as environment variables in production and rotate `AUTH_SECRET`.

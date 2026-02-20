@@ -13,11 +13,14 @@ def test_vercel_config_and_entrypoint_exist() -> None:
     content = entrypoint.read_text(encoding="utf-8")
     assert "VOICE_AGENT_DB_PATH" in content
     assert "/tmp/voice_agents.db" in content
+    assert "ADMIN_EMAIL" in content
+    assert "ADMIN_PASSWORD" in content
 
 
 def test_live_endpoints_are_exposed() -> None:
     content = Path("api/index.py").read_text(encoding="utf-8")
     for endpoint in [
+        '@app.post("/admin/login")',
         '@app.get("/health")',
         '@app.get("/api/health")',
         '@app.post("/users")',

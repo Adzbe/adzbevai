@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
 import os
+import time
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app.main import DB_PATH, VoiceAgentPlatform
 
-app = FastAPI(title="Voice Agent SaaS API", version="1.1.0")
+app = FastAPI(title="Voice Agent SaaS API", version="1.2.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,6 +24,11 @@ app.add_middleware(
 )
 
 _platform: VoiceAgentPlatform | None = None
+
+
+class AdminLoginPayload(BaseModel):
+    email: str
+    password: str
 
 
 class CreateUserPayload(BaseModel):
@@ -69,9 +78,56 @@ def _get_platform() -> VoiceAgentPlatform:
     return _platform
 
 
+def _admin_email() -> str:
+    return os.getenv("ADMIN_EMAIL", "admin@voiceagent.ai")
+
+
+def _admin_password() -> str:
+    return os.getenv("ADMIN_PASSWORD", "Admin@2026")
+
+
+def _auth_secret() -> str:
+    return os.getenv("AUTH_SECRET", "voice-agent-secret")
+
+
+def _create_admin_token(email: str) -> str:
+    expiration = int(time.time()) + 60 * 60 * 8
+    payload = f"{email}:{expiration}"
+    signature = hmac.new(_auth_secret().encode(), payload.encode(), hashlib.sha256).hexdigest()
+    return base64.urlsafe_b64encode(f"{payload}:{signature}".encode()).decode()
+
+
+def _require_admin(authorization: str | None) -> None:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Admin token required")
+
+    token = authorization.removeprefix("Bearer ").strip()
+    try:
+        decoded = base64.urlsafe_b64decode(token.encode()).decode()
+        email, expiry_text, signature = decoded.split(":", maxsplit=2)
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail="Invalid admin token") from exc
+
+    payload = f"{email}:{expiry_text}"
+    expected = hmac.new(_auth_secret().encode(), payload.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(signature, expected):
+        raise HTTPException(status_code=401, detail="Invalid admin token signature")
+
+    if email != _admin_email() or int(expiry_text) < int(time.time()):
+        raise HTTPException(status_code=401, detail="Expired or unauthorized admin token")
+
+
 @app.get("/")
 def website_root() -> dict[str, str]:
     return {"status": "ok", "message": "Voice Agent SaaS API is running"}
+
+
+@app.post("/admin/login")
+@app.post("/api/admin/login")
+def admin_login(payload: AdminLoginPayload) -> dict[str, str]:
+    if payload.email != _admin_email() or payload.password != _admin_password():
+        raise HTTPException(status_code=401, detail="Invalid admin credentials")
+    return {"access_token": _create_admin_token(payload.email), "token_type": "bearer"}
 
 
 @app.get("/health")
@@ -86,7 +142,8 @@ def health() -> dict[str, str]:
 
 @app.get("/admin/users")
 @app.get("/api/admin/users")
-def list_users() -> list[dict]:
+def list_users(authorization: str | None = Header(default=None)) -> list[dict]:
+    _require_admin(authorization)
     try:
         return _get_platform().list_users()
     except Exception as exc:
@@ -95,7 +152,8 @@ def list_users() -> list[dict]:
 
 @app.patch("/admin/users/{user_id}/active")
 @app.patch("/api/admin/users/{user_id}/active")
-def set_user_active(user_id: int, is_active: bool) -> dict[str, str]:
+def set_user_active(user_id: int, is_active: bool, authorization: str | None = Header(default=None)) -> dict[str, str]:
+    _require_admin(authorization)
     try:
         _get_platform().set_user_active(user_id, is_active)
         return {"status": "updated"}
@@ -107,7 +165,8 @@ def set_user_active(user_id: int, is_active: bool) -> dict[str, str]:
 
 @app.post("/users")
 @app.post("/api/users")
-def create_user(payload: CreateUserPayload) -> dict:
+def create_user(payload: CreateUserPayload, authorization: str | None = Header(default=None)) -> dict:
+    _require_admin(authorization)
     try:
         user = _get_platform().create_user(
             payload.company_name,

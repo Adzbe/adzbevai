@@ -3,168 +3,208 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voice Agent SaaS Platform</title>
+  <title>VoiceAgent Cloud OS</title>
   <style>
-    :root { --bg:#f4f6fb; --card:#fff; --text:#121826; --brand:#2563eb; --ok:#0f9d58; --err:#d93025; }
+    :root {
+      --bg: #070b18;
+      --bg-soft: #0f1631;
+      --panel: rgba(15, 22, 49, 0.72);
+      --panel-border: rgba(130, 153, 255, 0.22);
+      --text: #f7f8ff;
+      --muted: #9eaad6;
+      --primary: #6d7cff;
+      --primary-2: #43d1ff;
+      --success: #22c55e;
+      --danger: #ef4444;
+    }
+
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: Inter, Arial, sans-serif; color: var(--text); background: var(--bg); }
-    header { background: #0b1224; color: #fff; padding: 18px 24px; }
-    header h1 { margin: 0; font-size: 24px; }
-    header p { margin: 6px 0 0; opacity: .86; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .grid { display: grid; gap: 16px; grid-template-columns: repeat(2,minmax(0,1fr)); }
-    .full { grid-column: 1/-1; }
-    .card { background: var(--card); border-radius: 12px; box-shadow: 0 4px 16px rgba(9,30,66,.08); padding: 16px; }
-    .card h2 { margin: 0 0 10px; font-size: 18px; }
-    label { font-size: 12px; font-weight: 700; display: block; margin-top: 8px; }
-    input, textarea, select, button { width: 100%; border: 1px solid #d0d7e2; border-radius: 8px; padding: 10px; margin-top: 6px; }
-    textarea { min-height: 70px; }
-    button { background: var(--brand); border: 0; color: #fff; font-weight: 700; cursor: pointer; }
-    button.secondary { background: #334155; }
-    .row { display:grid; gap: 10px; grid-template-columns: 1fr 1fr; }
-    pre { background:#0f172a; color:#dbeafe; padding: 10px; border-radius: 8px; min-height: 80px; white-space: pre-wrap; }
-    .status { margin-bottom: 10px; padding: 10px; border-radius: 8px; font-size: 14px; }
-    .ok { background: #ecfdf3; color: #065f46; border: 1px solid #a7f3d0; }
-    .error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-    .muted { color:#4b5563; font-size: 13px; }
-    @media (max-width: 900px){ .grid{grid-template-columns:1fr;} .row{grid-template-columns:1fr;} }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 10% 0%, #1d2b63 0%, var(--bg) 44%), var(--bg);
+      min-height: 100vh;
+    }
+
+    .layout {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 26px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 280px 1fr;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar { padding: 16px; position: sticky; top: 16px; height: fit-content; }
+    .brand { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .tag { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+    .status { padding: 10px; border-radius: 12px; font-size: 13px; margin: 12px 0; }
+    .ok { background: rgba(34, 197, 94, 0.17); border: 1px solid rgba(34, 197, 94, 0.34); }
+    .error { background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.34); }
+
+    .nav-btn { width: 100%; margin-top: 8px; }
+
+    .content { display: grid; gap: 16px; }
+    .hero { padding: 22px; }
+    .hero h1 { margin: 0; font-size: clamp(26px, 4vw, 38px); }
+    .hero p { color: var(--muted); margin: 8px 0 0; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .kpi { padding: 16px; }
+    .kpi strong { font-size: 24px; display: block; margin-top: 4px; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .card { padding: 18px; }
+    .card h2 { margin: 0 0 12px; font-size: 18px; }
+
+    label { font-size: 12px; color: var(--muted); display: block; margin-top: 10px; }
+    input, textarea, select, button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(150, 170, 255, 0.28);
+      background: rgba(13, 19, 43, 0.75);
+      color: var(--text);
+      padding: 11px 12px;
+      margin-top: 6px;
+    }
+
+    button {
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--primary), var(--primary-2));
+      color: white;
+    }
+
+    .btn-secondary { background: rgba(84, 102, 194, 0.36); border: 1px solid rgba(163, 176, 255, 0.4); }
+    .row { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+    pre { white-space: pre-wrap; background: #060a1a; border-radius: 12px; padding: 12px; min-height: 88px; border: 1px solid rgba(127, 148, 255, 0.24); }
+
+    .full { grid-column: 1 / -1; }
+
+    @media (max-width: 1020px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .stats, .grid, .row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Voice Agent SaaS — Complete Live Website</h1>
-    <p>Create tenants, train agents, capture leads, push CRM, export XLSX.</p>
-  </header>
+  <div class="layout">
+    <aside class="panel sidebar">
+      <div class="brand">VoiceAgent Cloud OS</div>
+      <div class="tag">Complete Live Website · Enterprise-ready 2026 UI</div>
+      <div id="banner" class="status ok">Welcome. Sign in as admin to unlock controls.</div>
+      <button class="nav-btn" onclick="healthCheck()">System Health Check</button>
+      <button class="nav-btn btn-secondary" onclick="listUsers()">Refresh Users</button>
+      <button class="nav-btn btn-secondary" onclick="listAgents()">Refresh Agents</button>
+      <button class="nav-btn btn-secondary" onclick="logout()">Logout</button>
 
-  <main class="container">
-    <div id="banner" class="status ok">Website loaded. Click <b>Health Check</b> to verify backend.</div>
+      <label>Admin Email</label>
+      <input id="admin_email" value="admin@voiceagent.ai" />
+      <label>Admin Password</label>
+      <input id="admin_password" type="password" value="Admin@2026" />
+      <button onclick="adminLogin()">Admin Login</button>
+      <small style="color:var(--muted);display:block;margin-top:8px;">Set production creds with ADMIN_EMAIL and ADMIN_PASSWORD.</small>
+    </aside>
 
-    <section class="grid">
-      <article class="card">
-        <h2>1) Platform Health & Users</h2>
-        <button onclick="healthCheck()">Health Check</button>
-        <div class="row">
-          <button class="secondary" onclick="listUsers()">List Users</button>
-          <button class="secondary" onclick="toggleUser()">Activate/Deactivate User</button>
-        </div>
+    <main class="content">
+      <section class="panel hero">
+        <h1>Client-Ready Voice Agent SaaS Website</h1>
+        <p>Manage admin, onboard users, train conversational agents, collect leads, push CRM, and export XLSX — from one polished dashboard.</p>
+      </section>
 
-        <label>Company Name</label>
-        <input id="company_name" placeholder="Acme Dental" />
-        <label>Email</label>
-        <input id="email" placeholder="owner@acme.test" />
-        <div class="row">
-          <div>
-            <label>Role</label>
-            <select id="role"><option>client</option><option>admin</option></select>
-          </div>
-          <div>
-            <label>Subscription</label>
-            <select id="subscription_plan"><option>starter</option><option>growth</option><option>enterprise</option></select>
-          </div>
-        </div>
-        <button onclick="createUser()">Create User</button>
+      <section class="stats">
+        <article class="panel kpi"><span>Total Users</span><strong id="kpi_users">0</strong></article>
+        <article class="panel kpi"><span>Total Agents</span><strong id="kpi_agents">0</strong></article>
+        <article class="panel kpi"><span>Captured Leads</span><strong id="kpi_leads">0</strong></article>
+      </section>
 
-        <div class="row">
-          <div>
-            <label>User ID for toggle</label>
-            <input id="toggle_user_id" placeholder="1" />
+      <section class="grid">
+        <article class="panel card">
+          <h2>Admin · User Creation</h2>
+          <label>Company Name</label>
+          <input id="company_name" placeholder="Acme Dental" />
+          <label>Email</label>
+          <input id="email" placeholder="owner@acme.test" />
+          <div class="row">
+            <div><label>Role</label><select id="role"><option>client</option><option>admin</option></select></div>
+            <div><label>Subscription</label><select id="subscription_plan"><option>starter</option><option>growth</option><option>enterprise</option></select></div>
           </div>
-          <div>
-            <label>is_active</label>
-            <select id="toggle_active"><option value="true">true</option><option value="false">false</option></select>
+          <button onclick="createUser()">Create User</button>
+          <div class="row">
+            <div><label>User ID</label><input id="toggle_user_id" placeholder="1" /></div>
+            <div><label>is_active</label><select id="toggle_active"><option value="true">true</option><option value="false">false</option></select></div>
           </div>
-        </div>
-        <pre id="users_out"></pre>
-      </article>
+          <button class="btn-secondary" onclick="toggleUser()">Update User Status</button>
+          <pre id="users_out"></pre>
+        </article>
 
-      <article class="card">
-        <h2>2) Agent Training Builder</h2>
-        <label>User ID</label>
-        <input id="agent_user_id" placeholder="auto-filled from create user" />
-        <label>Agent Name</label>
-        <input id="agent_name" placeholder="Dental Assistant AI" />
-        <label>Business Type</label>
-        <input id="business_type" placeholder="dental clinic" />
-        <div class="row">
-          <div>
-            <label>Goals (comma-separated)</label>
-            <input id="goals" placeholder="bookings,customer_service" />
+        <article class="panel card">
+          <h2>Client · Agent Builder</h2>
+          <label>User ID</label>
+          <input id="agent_user_id" placeholder="auto-filled from user creation" />
+          <label>Agent Name</label>
+          <input id="agent_name" placeholder="Dental Assistant AI" />
+          <label>Business Type</label>
+          <input id="business_type" placeholder="dental clinic" />
+          <div class="row">
+            <div><label>Goals</label><input id="goals" placeholder="bookings,customer_service" /></div>
+            <div><label>Languages</label><input id="languages" placeholder="en,es,ar" /></div>
           </div>
-          <div>
-            <label>Languages (comma-separated)</label>
-            <input id="languages" placeholder="en,es" />
+          <label>Products</label><textarea id="products"></textarea>
+          <label>Services</label><textarea id="services"></textarea>
+          <label>Prices</label><textarea id="prices"></textarea>
+          <label>Patterns</label><textarea id="patterns"></textarea>
+          <div class="row">
+            <button onclick="createAgent()">Create Agent</button>
+            <button class="btn-secondary" onclick="listAgents()">List Agents</button>
           </div>
-        </div>
-        <label>Products (1 per line)</label>
-        <textarea id="products"></textarea>
-        <label>Services (1 per line)</label>
-        <textarea id="services"></textarea>
-        <label>Prices (1 per line)</label>
-        <textarea id="prices"></textarea>
-        <label>Patterns (1 per line)</label>
-        <textarea id="patterns"></textarea>
+          <pre id="agents_out"></pre>
+        </article>
 
-        <div class="row">
-          <button onclick="createAgent()">Create Agent</button>
-          <button class="secondary" onclick="listAgents()">List Agents</button>
-        </div>
-
-        <pre id="agents_out"></pre>
-      </article>
-
-      <article class="card full">
-        <h2>3) Lead Capture + CRM + Export</h2>
-        <p class="muted">Use returned <b>unique_link</b> from agent creation for ads/websites.</p>
-        <div class="row">
-          <div>
-            <label>Unique Link (full URL)</label>
-            <input id="unique_link" placeholder="https://voice.example.com/a/..." />
+        <article class="panel card full">
+          <h2>Conversation Ops · CRM Pipeline</h2>
+          <div class="row">
+            <div><label>Unique Link</label><input id="unique_link" placeholder="https://voice.example.com/a/..." /></div>
+            <div><label>Language</label><select id="script_language"><option>en</option><option>es</option><option>ar</option><option>fr</option></select></div>
           </div>
-          <div>
-            <label>Language</label>
-            <select id="script_language"><option>en</option><option>es</option></select>
+          <button onclick="publicScript()">Generate Public Script</button>
+          <div class="row">
+            <div><label>Agent ID</label><input id="conv_agent_id" placeholder="1" /></div>
+            <div><label>Intent</label><input id="conv_intent" placeholder="booking" /></div>
           </div>
-        </div>
-        <button onclick="publicScript()">Get Public Script</button>
-
-        <div class="row">
-          <div>
-            <label>Agent ID</label>
-            <input id="conv_agent_id" placeholder="1" />
+          <label>Conversation Details</label>
+          <textarea id="conv_details" placeholder="Customer wants premium package and callback within 2 hours."></textarea>
+          <label>Customer Payload JSON</label>
+          <textarea id="customer_payload">{"full_name":"John Doe","phone":"+123","email":"john@test.com","preferred_date":"2026-03-05","service_interest":"Cleaning","issue_summary":"Need callback"}</textarea>
+          <button onclick="captureConversation()">Capture Conversation</button>
+          <div class="row">
+            <div><label>Conversation ID</label><input id="conversation_id" placeholder="auto-filled" /></div>
+            <div><label>CRM Name</label><input id="crm_name" value="hubspot" /></div>
           </div>
-          <div>
-            <label>Intent</label>
-            <input id="conv_intent" placeholder="booking" />
+          <div class="row">
+            <button onclick="pushCRM()">Push to CRM</button>
+            <button class="btn-secondary" onclick="downloadExport()">Download CRM XLSX</button>
           </div>
-        </div>
-        <label>Conversation details</label>
-        <textarea id="conv_details" placeholder="Customer asked for next-week appointment"></textarea>
-        <label>Customer Payload JSON</label>
-        <textarea id="customer_payload">{"full_name":"John","phone":"+123","email":"john@test.com","preferred_date":"2026-03-05","service_interest":"Cleaning","issue_summary":"Need callback"}</textarea>
-        <button onclick="captureConversation()">Capture Conversation</button>
-
-        <div class="row">
-          <div>
-            <label>Conversation ID</label>
-            <input id="conversation_id" placeholder="auto-filled" />
-          </div>
-          <div>
-            <label>CRM Name</label>
-            <input id="crm_name" value="hubspot" />
-          </div>
-        </div>
-        <div class="row">
-          <button onclick="pushCRM()">Push to CRM</button>
-          <button class="secondary" onclick="downloadExport()">Download CRM XLSX</button>
-        </div>
-
-        <pre id="leads_out"></pre>
-      </article>
-    </section>
-  </main>
+          <pre id="leads_out"></pre>
+        </article>
+      </section>
+    </main>
+  </div>
 
   <script>
     const API = '/api';
+    let adminToken = localStorage.getItem('voice_admin_token') || '';
+
     const out = (id, v) => document.getElementById(id).textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
     const lines = (v) => v.split('\n').map(x => x.trim()).filter(Boolean);
 
@@ -175,15 +215,43 @@
     }
 
     async function req(path, options={}) {
-      const res = await fetch(`${API}${path}`, {
-        headers: { 'Content-Type': 'application/json' },
-        ...options,
-      });
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      if (adminToken) headers.Authorization = `Bearer ${adminToken}`;
+
+      const res = await fetch(`${API}${path}`, { ...options, headers });
       const txt = await res.text();
       let data;
       try { data = JSON.parse(txt); } catch { data = txt; }
       if (!res.ok) throw new Error(typeof data === 'string' ? data : JSON.stringify(data));
       return data;
+    }
+
+    function updateKpis(users = null, agents = null, leads = null) {
+      if (users !== null) document.getElementById('kpi_users').textContent = users;
+      if (agents !== null) document.getElementById('kpi_agents').textContent = agents;
+      if (leads !== null) document.getElementById('kpi_leads').textContent = leads;
+    }
+
+    async function adminLogin(){
+      try {
+        const payload = {
+          email: document.getElementById('admin_email').value,
+          password: document.getElementById('admin_password').value,
+        };
+        const d = await req('/admin/login', { method:'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        adminToken = d.access_token;
+        localStorage.setItem('voice_admin_token', adminToken);
+        banner('Admin login successful. Full controls unlocked.');
+        await listUsers();
+      } catch (e) {
+        banner(`Admin login failed: ${e.message}`, false);
+      }
+    }
+
+    function logout() {
+      adminToken = '';
+      localStorage.removeItem('voice_admin_token');
+      banner('Logged out. Admin-only actions are blocked until you login again.');
     }
 
     async function healthCheck(){
@@ -203,11 +271,16 @@
         document.getElementById('agent_user_id').value = d.id;
         document.getElementById('toggle_user_id').value = d.id;
         out('users_out', d);
+        await listUsers();
       } catch(e){ out('users_out', e.message); }
     }
 
     async function listUsers(){
-      try { out('users_out', await req('/admin/users')); }
+      try {
+        const users = await req('/admin/users');
+        out('users_out', users);
+        updateKpis(users.length, null, null);
+      }
       catch(e){ out('users_out', e.message); }
     }
 
@@ -215,7 +288,9 @@
       try {
         const id = document.getElementById('toggle_user_id').value;
         const active = document.getElementById('toggle_active').value;
-        out('users_out', await req(`/admin/users/${id}/active?is_active=${active}`, { method: 'PATCH' }));
+        const data = await req(`/admin/users/${id}/active?is_active=${active}`, { method: 'PATCH' });
+        out('users_out', data);
+        await listUsers();
       } catch(e){ out('users_out', e.message); }
     }
 
@@ -236,13 +311,17 @@
         document.getElementById('unique_link').value = d.unique_link || '';
         document.getElementById('conv_agent_id').value = d.id || '';
         out('agents_out', d);
+        await listAgents();
       } catch(e){ out('agents_out', e.message); }
     }
 
     async function listAgents(){
       try {
         const uid = document.getElementById('agent_user_id').value;
-        out('agents_out', await req(`/users/${uid}/agents`));
+        if (!uid) return;
+        const agents = await req(`/users/${uid}/agents`);
+        out('agents_out', agents);
+        updateKpis(null, agents.length, null);
       } catch(e){ out('agents_out', e.message); }
     }
 
@@ -266,6 +345,8 @@
         const d = await req(`/agents/${agentId}/conversations`, { method: 'POST', body: JSON.stringify(payload) });
         document.getElementById('conversation_id').value = d.conversation_id || '';
         out('leads_out', d);
+        const current = Number(document.getElementById('kpi_leads').textContent || '0');
+        updateKpis(null, null, current + 1);
       } catch(e){ out('leads_out', e.message); }
     }
 
@@ -281,6 +362,8 @@
       const uid = document.getElementById('agent_user_id').value;
       window.open(`${API}/users/${uid}/crm/export`, '_blank');
     }
+
+    healthCheck();
   </script>
 </body>
 </html>
